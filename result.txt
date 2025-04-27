@@ -1,0 +1,2867 @@
+# .\App.tsx
+
+import { useState } from 'react';
+import reactLogo from './assets/react.svg';
+import viteLogo from '/vite.svg';
+import './App.css';
+import ThemeProvider, { useTheme } from './theme/ThemeProvider';
+import {
+  Card,
+  Button,
+  Input,
+  Badge,
+  Tooltip,
+} from './examples/ShapeUsageExamples';
+
+// Theme Switcher Component
+const ThemeSwitcher = () => {
+  const { themeMode, setThemeMode, availableThemes, setThemeId } = useTheme();
+
+  return (
+    <div className="mb-8 p-4 bg-backgroundMuted rounded-lg">
+      <h2 className="text-lg font-semibold mb-3">Theme Controls</h2>
+
+      <div className="flex flex-wrap gap-4 mb-4">
+        <Button
+          variant={themeMode === 'light' ? 'solid' : 'outline'}
+          onClick={() => setThemeMode('light')}
+          size="sm"
+        >
+          Light Mode
+        </Button>
+        <Button
+          variant={themeMode === 'dark' ? 'solid' : 'outline'}
+          onClick={() => setThemeMode('dark')}
+          size="sm"
+        >
+          Dark Mode
+        </Button>
+        <Button
+          variant={themeMode === 'system' ? 'solid' : 'outline'}
+          onClick={() => setThemeMode('system')}
+          size="sm"
+        >
+          System Mode
+        </Button>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Theme Palette:</label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {Object.entries(availableThemes).map(([id, theme]) => (
+            <Button
+              key={id}
+              variant="ghost"
+              size="sm"
+              className="justify-start"
+              onClick={() => setThemeId(id)}
+            >
+              <span
+                className="inline-block w-3 h-3 rounded-full mr-2"
+                style={{ backgroundColor: theme.colors.primary }}
+              />
+              {theme.name}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main App content component that uses the theme
+const AppContent = () => {
+  const [count, setCount] = useState(0);
+  const { currentTheme } = useTheme();
+
+  return (
+    <div className="p-4 max-w-6xl mx-auto">
+      <ThemeSwitcher />
+
+      <div className="mb-6">
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+
+      <h1 className="text-3xl font-bold mb-4">Vite + React + Design System</h1>
+
+      <Card className="mb-6">
+        <div className="flex flex-col items-center">
+          <Button onClick={() => setCount((count) => count + 1)}>
+            count is {count}
+          </Button>
+          <p className="mt-4">
+            Edit <code>src/App.tsx</code> and save to test HMR
+          </p>
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Card variant="outlined">
+          <h2 className="text-xl font-semibold mb-3">Current Theme</h2>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="primary">ID: {currentTheme.theme.id}</Badge>
+            <Badge variant="info">Mode: {currentTheme.theme.name}</Badge>
+            <Tooltip
+              content={
+                currentTheme.theme.description || 'No description available'
+              }
+            >
+              <Badge variant="info">Info</Badge>
+            </Tooltip>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <div
+              className="p-3 rounded"
+              style={{ backgroundColor: currentTheme.theme.colors.primary }}
+            >
+              <span className="text-white">Primary</span>
+            </div>
+            <div
+              className="p-3 rounded"
+              style={{ backgroundColor: currentTheme.theme.colors.secondary }}
+            >
+              <span className="text-white">Secondary</span>
+            </div>
+          </div>
+        </Card>
+
+        <Card variant="flat">
+          <h2 className="text-xl font-semibold mb-3">Shape System Demo</h2>
+          <div className="space-y-4">
+            <Input placeholder="Enter some text..." />
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" radius="none">
+                Square
+              </Button>
+              <Button size="sm">Default</Button>
+              <Button size="sm" radius="full">
+                Rounded
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <p className="text-textSecondary">
+        Click on the Vite and React logos to learn more
+      </p>
+    </div>
+  );
+};
+
+// Main App with ThemeProvider wrapper
+function App() {
+  return (
+    <ThemeProvider initialMode="system" initialThemeId="light">
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+
+export default App;
+
+
+================================================================================
+
+# .\examples\ShapeUsageExamples.tsx
+
+import React from 'react';
+import { defaultShapeSystemConfig } from '../theme/config/shape';
+
+// Example Card component using the shape system
+export const Card: React.FC<{
+  children: React.ReactNode;
+  variant?: 'flat' | 'outlined' | 'elevated';
+  radius?: keyof typeof defaultShapeSystemConfig.shape.borderRadius;
+  className?: string;
+}> = ({ children, variant = 'elevated', radius = 'lg', className = '' }) => {
+  // Base styles
+  const baseStyles = `
+    p-6
+    overflow-hidden
+  `;
+
+  // Border radius from theme
+  const radiusStyles = `rounded-${radius}`;
+
+  // Variant-specific styles
+  let variantStyles = '';
+
+  switch (variant) {
+    case 'flat':
+      variantStyles = `
+        bg-backgroundMuted
+        border-none
+      `;
+      break;
+    case 'outlined':
+      variantStyles = `
+        bg-background
+        border border-width-light border-border
+      `;
+      break;
+    case 'elevated':
+    default:
+      variantStyles = `
+        bg-background
+        shadow-md
+        border-none
+      `;
+      break;
+  }
+
+  // Combined styles
+  const styles = `${baseStyles} ${radiusStyles} ${variantStyles} ${className}`;
+
+  return <div className={styles}>{children}</div>;
+};
+
+// Example Button component using the shape system
+export const Button: React.FC<{
+  children: React.ReactNode;
+  variant?: 'solid' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  radius?: keyof typeof defaultShapeSystemConfig.shape.borderRadius;
+  className?: string;
+  onClick?: () => void;
+}> = ({
+  children,
+  variant = 'solid',
+  size = 'md',
+  radius = 'md',
+  className = '',
+  onClick,
+}) => {
+  // Base styles
+  const baseStyles = `
+    font-medium
+    inline-flex
+    items-center
+    justify-center
+    transition-all
+    duration-200
+  `;
+
+  // Size-specific styles
+  let sizeStyles = '';
+
+  switch (size) {
+    case 'sm':
+      sizeStyles = `
+        px-3
+        py-1.5
+        text-sm
+      `;
+      break;
+    case 'lg':
+      sizeStyles = `
+        px-6
+        py-3
+        text-lg
+      `;
+      break;
+    case 'md':
+    default:
+      sizeStyles = `
+        px-4
+        py-2
+        text-base
+      `;
+      break;
+  }
+
+  // Border radius from theme
+  const radiusStyles = `rounded-${radius}`;
+
+  // Variant-specific styles
+  let variantStyles = '';
+
+  switch (variant) {
+    case 'outline':
+      variantStyles = `
+        bg-transparent
+        border border-width-light border-primary
+        text-primary
+        hover:bg-primarySubtle
+      `;
+      break;
+    case 'ghost':
+      variantStyles = `
+        bg-transparent
+        border-none
+        text-primary
+        hover:bg-primarySubtle
+      `;
+      break;
+    case 'solid':
+    default:
+      variantStyles = `
+        bg-primary
+        border-none
+        text-white
+        shadow-sm
+        hover:bg-primaryHover
+        active:shadow-none
+      `;
+      break;
+  }
+
+  // Combined styles
+  const styles = `${baseStyles} ${sizeStyles} ${radiusStyles} ${variantStyles} ${className}`;
+
+  return (
+    <button className={styles} onClick={onClick}>
+      {children}
+    </button>
+  );
+};
+
+// Example Input component using the shape system
+export const Input: React.FC<{
+  placeholder?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  radius?: keyof typeof defaultShapeSystemConfig.shape.borderRadius;
+  className?: string;
+}> = ({ placeholder, value, onChange, radius = 'md', className = '' }) => {
+  // Base styles
+  const baseStyles = `
+    w-full
+    px-4
+    py-2
+    bg-background
+    border border-width-light border-border
+    focus:outline-none
+    focus:border-primary
+    focus:ring-1
+    focus:ring-primaryOutline
+    transition-all
+    duration-200
+  `;
+
+  // Border radius from theme
+  const radiusStyles = `rounded-${radius}`;
+
+  // Combined styles
+  const styles = `${baseStyles} ${radiusStyles} ${className}`;
+
+  return (
+    <input
+      type="text"
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      className={styles}
+    />
+  );
+};
+
+// Example Badge component
+export const Badge: React.FC<{
+  children: React.ReactNode;
+  variant?: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  className?: string;
+}> = ({ children, variant = 'primary', className = '' }) => {
+  // Base styles
+  const baseStyles = `
+    inline-flex
+    items-center
+    justify-center
+    px-2
+    py-0.5
+    text-xs
+    font-medium
+    rounded-full
+  `;
+
+  // Variant-specific styles
+  let variantStyles = '';
+
+  switch (variant) {
+    case 'success':
+      variantStyles = 'bg-successSubtle text-success';
+      break;
+    case 'warning':
+      variantStyles = 'bg-warningSubtle text-warning';
+      break;
+    case 'error':
+      variantStyles = 'bg-errorSubtle text-error';
+      break;
+    case 'info':
+      variantStyles = 'bg-infoSubtle text-info';
+      break;
+    case 'primary':
+    default:
+      variantStyles = 'bg-primarySubtle text-primary';
+      break;
+  }
+
+  // Combined styles
+  const styles = `${baseStyles} ${variantStyles} ${className}`;
+
+  return <span className={styles}>{children}</span>;
+};
+
+// Example Tooltip component using the shape system
+export const Tooltip: React.FC<{
+  content: string;
+  children: React.ReactNode;
+  position?: 'top' | 'right' | 'bottom' | 'left';
+  className?: string;
+}> = ({ content, children, position = 'top', className = '' }) => {
+  // Group styles for the tooltip container
+  const containerStyles = `
+    relative
+    inline-flex
+    group
+  `;
+
+  // Base styles for the tooltip
+  const baseStyles = `
+    absolute
+    invisible
+    opacity-0
+    bg-backgroundSubtle
+    text-text
+    text-sm
+    px-2
+    py-1
+    whitespace-nowrap
+    shadow-sm
+    rounded-sm
+    transition-opacity
+    duration-200
+    z-10
+    group-hover:visible
+    group-hover:opacity-100
+  `;
+
+  // Position-specific styles
+  let positionStyles = '';
+
+  switch (position) {
+    case 'right':
+      positionStyles = 'left-full ml-2 top-1/2 transform -translate-y-1/2';
+      break;
+    case 'bottom':
+      positionStyles = 'top-full mt-2 left-1/2 transform -translate-x-1/2';
+      break;
+    case 'left':
+      positionStyles = 'right-full mr-2 top-1/2 transform -translate-y-1/2';
+      break;
+    case 'top':
+    default:
+      positionStyles = 'bottom-full mb-2 left-1/2 transform -translate-x-1/2';
+      break;
+  }
+
+  // Combined styles
+  const tooltipStyles = `${baseStyles} ${positionStyles} ${className}`;
+
+  return (
+    <div className={containerStyles}>
+      {children}
+      <div className={tooltipStyles}>{content}</div>
+    </div>
+  );
+};
+
+// Demo component showcasing all the shape examples
+export const ShapeExamplesDemo: React.FC = () => {
+  return (
+    <div className="p-8 space-y-8">
+      <h1 className="text-3xl font-bold mb-6">Shape System Examples</h1>
+
+      {/* Cards Example */}
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Cards</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card variant="flat">
+            <h3 className="text-lg font-medium mb-2">Flat Card</h3>
+            <p>This card uses the flat variant without shadows.</p>
+          </Card>
+
+          <Card variant="outlined">
+            <h3 className="text-lg font-medium mb-2">Outlined Card</h3>
+            <p>This card uses borders instead of shadows.</p>
+          </Card>
+
+          <Card variant="elevated">
+            <h3 className="text-lg font-medium mb-2">Elevated Card</h3>
+            <p>This card uses the default shadow elevation.</p>
+          </Card>
+        </div>
+      </section>
+
+      {/* Buttons Example */}
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Buttons</h2>
+        <div className="flex flex-wrap gap-4">
+          <Button variant="solid">Solid Button</Button>
+          <Button variant="outline">Outline Button</Button>
+          <Button variant="ghost">Ghost Button</Button>
+
+          <Button size="sm">Small Button</Button>
+          <Button size="md">Medium Button</Button>
+          <Button size="lg">Large Button</Button>
+
+          <Button radius="none">Square Button</Button>
+          <Button radius="md">Regular Button</Button>
+          <Button radius="full">Pill Button</Button>
+        </div>
+      </section>
+
+      {/* Inputs Example */}
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Inputs</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input placeholder="Default input" />
+          <Input placeholder="Square input" radius="none" />
+          <Input placeholder="Rounded input" radius="lg" />
+          <Input placeholder="Pill input" radius="full" />
+        </div>
+      </section>
+
+      {/* Badges Example */}
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Badges</h2>
+        <div className="flex flex-wrap gap-3">
+          <Badge variant="primary">Primary</Badge>
+          <Badge variant="success">Success</Badge>
+          <Badge variant="warning">Warning</Badge>
+          <Badge variant="error">Error</Badge>
+          <Badge variant="info">Info</Badge>
+        </div>
+      </section>
+
+      {/* Tooltips Example */}
+      <section>
+        <h2 className="text-xl font-semibold mb-4">Tooltips</h2>
+        <div className="flex flex-wrap gap-8 justify-center">
+          <Tooltip content="Top tooltip" position="top">
+            <Button variant="outline" size="sm">
+              Hover Me (Top)
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="Right tooltip" position="right">
+            <Button variant="outline" size="sm">
+              Hover Me (Right)
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="Bottom tooltip" position="bottom">
+            <Button variant="outline" size="sm">
+              Hover Me (Bottom)
+            </Button>
+          </Tooltip>
+
+          <Tooltip content="Left tooltip" position="left">
+            <Button variant="outline" size="sm">
+              Hover Me (Left)
+            </Button>
+          </Tooltip>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default ShapeExamplesDemo;
+
+
+================================================================================
+
+# .\main.tsx
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+================================================================================
+
+# .\theme\ThemeProvider.tsx
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Theme } from './types/theme';
+import { ThemeMode } from './types/theme';
+import { LayoutConfig } from './config/layout';
+import { ShapeSystemConfig } from './config/shape';
+import { lightTheme, darkTheme, themes, getThemeByMode } from './config/theme';
+import {
+  CompleteThemeConfig,
+  createCompleteTheme,
+  applyCompleteTheme,
+} from './config/integrated-theme';
+import { defaultLayoutConfig } from './config/layout';
+import { defaultShapeSystemConfig } from './config/shape';
+
+// Theme context interface
+interface ThemeContextType {
+  currentTheme: CompleteThemeConfig;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
+  setThemeId: (id: string) => void;
+  availableThemes: Record<string, Theme>;
+}
+
+// Create the theme context with default values
+const ThemeContext = createContext<ThemeContextType>({
+  currentTheme: createCompleteTheme(lightTheme),
+  themeMode: 'light',
+  setThemeMode: () => {},
+  setThemeId: () => {},
+  availableThemes: themes,
+});
+
+// Hook to use the theme context
+export const useTheme = () => useContext(ThemeContext);
+
+// Theme provider props
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  initialMode?: ThemeMode;
+  initialThemeId?: string;
+  customLayouts?: Record<string, LayoutConfig>;
+  customShapes?: Record<string, ShapeSystemConfig>;
+}
+
+// Theme provider component
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  initialMode = 'system',
+  initialThemeId = 'light',
+  customLayouts = {},
+  customShapes = {},
+}) => {
+  // Check system preference
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  );
+
+  // Theme state
+  const [themeMode, setThemeMode] = useState<ThemeMode>(initialMode);
+  const [themeId, setThemeId] = useState<string>(initialThemeId);
+
+  // Current theme state
+  const [currentTheme, setCurrentTheme] = useState<CompleteThemeConfig>(() => {
+    const baseTheme = themeId in themes ? themes[themeId] : lightTheme;
+    const layout = customLayouts[themeId] || defaultLayoutConfig;
+    const shape = customShapes[themeId] || defaultShapeSystemConfig;
+    return createCompleteTheme(baseTheme, layout, shape);
+  });
+
+  // Listen to system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemPrefersDark(e.matches);
+    };
+
+    // Add listener for modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+
+    return undefined;
+  }, []);
+
+  // Update theme when mode or system preference changes
+  useEffect(() => {
+    let effectiveThemeId = themeId;
+
+    // Handle system theme mode
+    if (themeMode === 'system') {
+      effectiveThemeId = systemPrefersDark ? 'dark' : 'light';
+    } else if (themeMode === 'dark') {
+      effectiveThemeId = themeId.endsWith('Dark') ? themeId : 'dark';
+    } else if (themeMode === 'light') {
+      effectiveThemeId = themeId.endsWith('Dark')
+        ? themeId.replace('Dark', '')
+        : themeId;
+    }
+
+    // Get the base theme
+    const baseTheme =
+      effectiveThemeId in themes
+        ? themes[effectiveThemeId]
+        : themeMode === 'dark'
+        ? darkTheme
+        : lightTheme;
+
+    // Get layout and shape configs
+    const layout = customLayouts[effectiveThemeId] || defaultLayoutConfig;
+    const shape = customShapes[effectiveThemeId] || defaultShapeSystemConfig;
+
+    // Create and set the complete theme
+    const newTheme = createCompleteTheme(baseTheme, layout, shape);
+    setCurrentTheme(newTheme);
+
+    // Apply theme to document
+    applyCompleteTheme(newTheme);
+
+    // Update data attribute for CSS selectors
+    document.documentElement.setAttribute('data-theme', baseTheme.id);
+    document.documentElement.setAttribute('data-theme-mode', themeMode);
+  }, [themeMode, themeId, systemPrefersDark, customLayouts, customShapes]);
+
+  // Create context value
+  const contextValue: ThemeContextType = {
+    currentTheme,
+    themeMode,
+    setThemeMode,
+    setThemeId,
+    availableThemes: themes,
+  };
+
+  return (
+    <ThemeContext.Provider value={contextValue}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+// Export the Provider component as default
+export default ThemeProvider;
+
+
+================================================================================
+
+# .\theme\config\integrated-theme.ts
+
+// config/integrated-theme.ts
+// Example of integrating all theme systems (colors, typography, layout, shape)
+
+import { Theme } from '../types/theme';
+import {
+  LayoutConfig,
+  defaultLayoutConfig,
+  extendThemeWithLayout,
+} from './layout';
+import {
+  ShapeSystemConfig,
+  defaultShapeSystemConfig,
+  extendThemeWithShape,
+} from './shape';
+import {
+  applyThemeToCssVars,
+  generateThemeCssVars,
+  lightTheme,
+  darkTheme,
+} from './theme';
+import { applyLayoutToCssVars } from './layout';
+import { applyShapeToCssVars } from './shape';
+
+// Complete theme configuration with all systems
+export interface CompleteThemeConfig {
+  theme: Theme;
+  layout: LayoutConfig;
+  shape: ShapeSystemConfig;
+}
+
+// Create a complete theme with all subsystems
+export function createCompleteTheme(
+  baseTheme: Theme = lightTheme,
+  layout: LayoutConfig = defaultLayoutConfig,
+  shape: ShapeSystemConfig = defaultShapeSystemConfig
+): CompleteThemeConfig {
+  // Extend the base theme with layout and shape
+  const themeWithLayout = extendThemeWithLayout(baseTheme, layout);
+  const completeTheme = extendThemeWithShape(themeWithLayout, shape);
+
+  return {
+    theme: completeTheme,
+    layout,
+    shape,
+  };
+}
+
+// Default light complete theme
+export const lightCompleteTheme = createCompleteTheme(lightTheme);
+
+// Default dark complete theme
+export const darkCompleteTheme = createCompleteTheme(darkTheme);
+
+// Apply a complete theme to the document
+export function applyCompleteTheme(
+  config: CompleteThemeConfig,
+  element: HTMLElement = document.documentElement
+): void {
+  // Apply all CSS variables from each system
+  applyThemeToCssVars(config.theme, element);
+  applyLayoutToCssVars(config.layout, element);
+  applyShapeToCssVars(config.shape, element);
+}
+
+// Generate all CSS variables for a theme
+export function generateAllCssVars(
+  config: CompleteThemeConfig
+): Record<string, string> {
+  return {
+    ...generateThemeCssVars(config.theme),
+    // Add other variable generators here
+  };
+}
+
+// Create themed shadow with primary color
+export function getPrimaryShadow(
+  theme: Theme,
+  level: keyof ShapeSystemConfig['shape']['shadows'] = 'md',
+  opacity: number = 0.2
+): string {
+  const shadowBase = defaultShapeSystemConfig.shape.shadows[level];
+  return shadowBase.replace(
+    /rgba\([^)]+\)/g,
+    `rgba(${hexToRgb(theme.colors.primary)}, ${opacity})`
+  );
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex: string): string {
+  // Remove # if present
+  hex = hex.replace('#', '');
+
+  // Convert 3-digit hex to 6-digit
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((char) => char + char)
+      .join('');
+  }
+
+  // Parse the hex values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return `${r}, ${g}, ${b}`;
+}
+
+// Example theme initialization function
+export function initializeTheme(
+  isDarkMode: boolean = false,
+  customConfig?: Partial<CompleteThemeConfig>
+): void {
+  // Start with the appropriate default theme
+  const baseConfig = isDarkMode ? darkCompleteTheme : lightCompleteTheme;
+
+  // Merge with any custom configuration
+  const config = customConfig ? { ...baseConfig, ...customConfig } : baseConfig;
+
+  // Apply the theme to the document
+  applyCompleteTheme(config);
+
+  // Set a data attribute on the HTML element for CSS selectors
+  document.documentElement.setAttribute(
+    'data-theme',
+    isDarkMode ? 'dark' : 'light'
+  );
+}
+
+
+================================================================================
+
+# .\theme\config\layout.ts
+
+// config/layout.ts
+// Implementation of the spacing and layout system
+
+import {
+  SpacingScale,
+  defaultSpacing,
+  SemanticSpacing,
+  defaultSemanticSpacing,
+  Breakpoints,
+  defaultBreakpoints,
+  GridSystem,
+  defaultGridSystem,
+} from '../types/spacing';
+import { Theme } from '../types/theme';
+
+// Complete layout configuration that can be customized per theme
+export interface LayoutConfig {
+  spacing: SpacingScale;
+  semanticSpacing: SemanticSpacing;
+  breakpoints: Breakpoints;
+  grid: GridSystem;
+}
+
+// Default layout configuration
+export const defaultLayoutConfig: LayoutConfig = {
+  spacing: defaultSpacing,
+  semanticSpacing: defaultSemanticSpacing,
+  breakpoints: defaultBreakpoints,
+  grid: defaultGridSystem,
+};
+
+// Generate spacing CSS variables from the config
+export function generateSpacingCssVars(
+  config: LayoutConfig
+): Record<string, string> {
+  const cssVars: Record<string, string> = {};
+
+  // Convert spacing scale to CSS variables
+  Object.entries(config.spacing).forEach(([key, value]) => {
+    cssVars[`--spacing-${key.replace('.', '-')}`] = value;
+  });
+
+  // Convert semantic spacing to CSS variables
+  Object.entries(config.semanticSpacing).forEach(([key, value]) => {
+    cssVars[`--${key}`] = config.spacing[value as keyof SpacingScale];
+  });
+
+  // Convert breakpoints to CSS variables
+  Object.entries(config.breakpoints).forEach(([key, value]) => {
+    cssVars[`--breakpoint-${key}`] = value;
+  });
+
+  // Convert grid config to CSS variables
+  cssVars['--grid-columns'] = config.grid.columns.toString();
+  cssVars['--grid-gutter'] = config.spacing[config.grid.gutter];
+
+  // Container max widths and paddings for each breakpoint
+  Object.entries(config.grid.containerMaxWidth).forEach(
+    ([breakpoint, width]) => {
+      cssVars[`--container-max-width-${breakpoint}`] = width;
+    }
+  );
+
+  Object.entries(config.grid.containerPadding).forEach(
+    ([breakpoint, padding]) => {
+      cssVars[`--container-padding-${breakpoint}`] = config.spacing[padding];
+    }
+  );
+
+  return cssVars;
+}
+
+// Apply layout CSS variables to an element (similar to theme vars)
+export function applyLayoutToCssVars(
+  config: LayoutConfig,
+  element: HTMLElement = document.documentElement
+): void {
+  const cssVars = generateSpacingCssVars(config);
+
+  Object.entries(cssVars).forEach(([prop, value]) => {
+    element.style.setProperty(prop, value);
+  });
+}
+
+// Integrate layout with theme system
+export function extendThemeWithLayout(
+  theme: Theme,
+  layoutConfig: LayoutConfig = defaultLayoutConfig
+): Theme & { layout: LayoutConfig } {
+  return {
+    ...theme,
+    layout: layoutConfig,
+  };
+}
+
+// Helper to create a custom layout config
+export function createCustomLayout(
+  options: Partial<LayoutConfig> = {}
+): LayoutConfig {
+  return {
+    spacing: options.spacing || defaultSpacing,
+    semanticSpacing: options.semanticSpacing || defaultSemanticSpacing,
+    breakpoints: options.breakpoints || defaultBreakpoints,
+    grid: options.grid || defaultGridSystem,
+  };
+}
+
+// Generate a responsive container class
+export function createResponsiveContainer(
+  config: LayoutConfig = defaultLayoutConfig
+): Record<string, any> {
+  const containerStyles: Record<string, any> = {
+    width: '100%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  };
+
+  // Add padding based on the smallest breakpoint
+  const smallestBreakpoint = Object.keys(
+    config.breakpoints
+  )[0] as keyof Breakpoints;
+  const basePadding =
+    config.spacing[config.grid.containerPadding[smallestBreakpoint]];
+  containerStyles.paddingLeft = basePadding;
+  containerStyles.paddingRight = basePadding;
+
+  // Add responsive max-widths and paddings
+  const mediaQueries: Record<string, any> = {};
+
+  Object.entries(config.breakpoints).forEach(([breakpoint, minWidth]) => {
+    const bpKey = breakpoint as keyof Breakpoints;
+    const maxWidth = config.grid.containerMaxWidth[bpKey];
+    const padding = config.spacing[config.grid.containerPadding[bpKey]];
+
+    mediaQueries[`@media (min-width: ${minWidth})`] = {
+      maxWidth,
+      paddingLeft: padding,
+      paddingRight: padding,
+    };
+  });
+
+  return { ...containerStyles, ...mediaQueries };
+}
+
+// Helper for creating a grid row
+export function createGridRow(
+  config: LayoutConfig = defaultLayoutConfig
+): Record<string, any> {
+  return {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginLeft: `calc(-1 * ${config.spacing[config.grid.gutter]})`,
+    marginRight: `calc(-1 * ${config.spacing[config.grid.gutter]})`,
+  };
+}
+
+// Helper for creating grid columns with responsive widths
+export function createGridColumn(
+  spans: Record<keyof Breakpoints, number>,
+  config: LayoutConfig = defaultLayoutConfig
+): Record<string, any> {
+  const columnStyles: Record<string, any> = {
+    paddingLeft: config.spacing[config.grid.gutter],
+    paddingRight: config.spacing[config.grid.gutter],
+    width: '100%', // Default for smallest screens
+  };
+
+  // Add responsive column spans
+  const mediaQueries: Record<string, any> = {};
+
+  Object.entries(config.breakpoints).forEach(([breakpoint, minWidth]) => {
+    const bpKey = breakpoint as keyof Breakpoints;
+    if (spans[bpKey]) {
+      const width = `${(spans[bpKey] / config.grid.columns) * 100}%`;
+
+      if (breakpoint === Object.keys(config.breakpoints)[0]) {
+        // For the smallest breakpoint, set directly
+        columnStyles.width = width;
+      } else {
+        // For larger breakpoints, use media queries
+        mediaQueries[`@media (min-width: ${minWidth})`] = {
+          width,
+        };
+      }
+    }
+  });
+
+  return { ...columnStyles, ...mediaQueries };
+}
+
+// Helper to create consistent spacing utilities
+export function createSpacingUtilities(
+  config: LayoutConfig = defaultLayoutConfig
+): Record<string, Record<string, string>> {
+  const utilities: Record<string, Record<string, string>> = {
+    margin: {},
+    marginTop: {},
+    marginRight: {},
+    marginBottom: {},
+    marginLeft: {},
+    padding: {},
+    paddingTop: {},
+    paddingRight: {},
+    paddingBottom: {},
+    paddingLeft: {},
+    gap: {},
+  };
+
+  // Generate all spacing variations
+  Object.entries(config.spacing).forEach(([key, value]) => {
+    const safeKey = key.replace('.', '-');
+
+    utilities.margin[`m-${safeKey}`] = value;
+    utilities.marginTop[`mt-${safeKey}`] = value;
+    utilities.marginRight[`mr-${safeKey}`] = value;
+    utilities.marginBottom[`mb-${safeKey}`] = value;
+    utilities.marginLeft[`ml-${safeKey}`] = value;
+    utilities.padding[`p-${safeKey}`] = value;
+    utilities.paddingTop[`pt-${safeKey}`] = value;
+    utilities.paddingRight[`pr-${safeKey}`] = value;
+    utilities.paddingBottom[`pb-${safeKey}`] = value;
+    utilities.paddingLeft[`pl-${safeKey}`] = value;
+    utilities.gap[`gap-${safeKey}`] = value;
+  });
+
+  return utilities;
+}
+
+
+================================================================================
+
+# .\theme\config\shape.ts
+
+// config/shape.ts
+// Implementation of the border, radius, and shadow system
+
+import {
+  ShapeConfig,
+  defaultShapeConfig,
+  ShapeVariants,
+  defaultShapeVariants,
+} from '../types/shape';
+import { Theme } from '../types/theme';
+
+// Complete shape configuration that can be customized per theme
+export interface ShapeSystemConfig {
+  shape: ShapeConfig;
+  variants: ShapeVariants;
+}
+
+// Default shape system configuration
+export const defaultShapeSystemConfig: ShapeSystemConfig = {
+  shape: defaultShapeConfig,
+  variants: defaultShapeVariants,
+};
+
+// Generate shape CSS variables from the config
+export function generateShapeCssVars(
+  config: ShapeSystemConfig
+): Record<string, string> {
+  const cssVars: Record<string, string> = {};
+
+  // Convert border widths to CSS variables
+  Object.entries(config.shape.borderWidths).forEach(([key, value]) => {
+    cssVars[`--border-width-${key}`] = value;
+  });
+
+  // Convert border radius values to CSS variables
+  Object.entries(config.shape.borderRadius).forEach(([key, value]) => {
+    cssVars[`--radius-${key}`] = value;
+  });
+
+  // Convert shadows to CSS variables
+  Object.entries(config.shape.shadows).forEach(([key, value]) => {
+    cssVars[`--shadow-${key}`] = value;
+  });
+
+  // Convert shape variants to CSS variables
+  Object.entries(config.variants).forEach(([key, value]) => {
+    // For border widths
+    if (key.includes('Border')) {
+      cssVars[`--${key}`] = config.shape.borderWidths[value];
+    }
+    // For border radius
+    else if (key.includes('Radius')) {
+      cssVars[`--${key}`] = config.shape.borderRadius[value];
+    }
+    // For shadows/elevation
+    else if (key.includes('Elevation')) {
+      cssVars[`--${key}`] = config.shape.shadows[value];
+    }
+  });
+
+  return cssVars;
+}
+
+// Apply shape CSS variables to an element
+export function applyShapeToCssVars(
+  config: ShapeSystemConfig,
+  element: HTMLElement = document.documentElement
+): void {
+  const cssVars = generateShapeCssVars(config);
+
+  Object.entries(cssVars).forEach(([prop, value]) => {
+    element.style.setProperty(prop, value);
+  });
+}
+
+// Integrate shape system with theme
+export function extendThemeWithShape(
+  theme: Theme,
+  shapeConfig: ShapeSystemConfig = defaultShapeSystemConfig
+): Theme & { shape: ShapeSystemConfig } {
+  return {
+    ...theme,
+    shape: shapeConfig,
+  };
+}
+
+// Helper to create a custom shape config
+export function createCustomShape(
+  options: Partial<ShapeSystemConfig> = {}
+): ShapeSystemConfig {
+  return {
+    shape: options.shape || defaultShapeConfig,
+    variants: options.variants || defaultShapeVariants,
+  };
+}
+
+// Helper to create component styles with borders
+export function createBorderedComponent(
+  borderWidth: keyof ShapeConfig['borderWidths'],
+  borderRadius: keyof ShapeConfig['borderRadius'],
+  config: ShapeSystemConfig = defaultShapeSystemConfig
+): Record<string, string> {
+  return {
+    borderWidth: config.shape.borderWidths[borderWidth],
+    borderStyle: 'solid',
+    borderRadius: config.shape.borderRadius[borderRadius],
+  };
+}
+
+// Helper to create component styles with elevation/shadow
+export function createElevatedComponent(
+  shadowLevel: keyof ShapeConfig['shadows'],
+  config: ShapeSystemConfig = defaultShapeSystemConfig
+): Record<string, string> {
+  return {
+    boxShadow: config.shape.shadows[shadowLevel],
+  };
+}
+
+// Generate utility classes for border widths
+export function createBorderWidthUtilities(
+  config: ShapeSystemConfig = defaultShapeSystemConfig
+): Record<string, Record<string, string>> {
+  const utilities: Record<string, Record<string, string>> = {
+    borderWidth: {},
+    borderTopWidth: {},
+    borderRightWidth: {},
+    borderBottomWidth: {},
+    borderLeftWidth: {},
+  };
+
+  // Generate all border width variations
+  Object.entries(config.shape.borderWidths).forEach(([key, value]) => {
+    utilities.borderWidth[`border-${key}`] = value;
+    utilities.borderTopWidth[`border-t-${key}`] = value;
+    utilities.borderRightWidth[`border-r-${key}`] = value;
+    utilities.borderBottomWidth[`border-b-${key}`] = value;
+    utilities.borderLeftWidth[`border-l-${key}`] = value;
+  });
+
+  return utilities;
+}
+
+// Generate utility classes for border radius
+export function createBorderRadiusUtilities(
+  config: ShapeSystemConfig = defaultShapeSystemConfig
+): Record<string, Record<string, string>> {
+  const utilities: Record<string, Record<string, string>> = {
+    borderRadius: {},
+    borderTopLeftRadius: {},
+    borderTopRightRadius: {},
+    borderBottomLeftRadius: {},
+    borderBottomRightRadius: {},
+  };
+
+  // Generate all border radius variations
+  Object.entries(config.shape.borderRadius).forEach(([key, value]) => {
+    utilities.borderRadius[`rounded-${key}`] = value;
+    utilities.borderTopLeftRadius[`rounded-tl-${key}`] = value;
+    utilities.borderTopRightRadius[`rounded-tr-${key}`] = value;
+    utilities.borderBottomLeftRadius[`rounded-bl-${key}`] = value;
+    utilities.borderBottomRightRadius[`rounded-br-${key}`] = value;
+  });
+
+  return utilities;
+}
+
+// Generate utility classes for shadows
+export function createShadowUtilities(
+  config: ShapeSystemConfig = defaultShapeSystemConfig
+): Record<string, Record<string, string>> {
+  const utilities: Record<string, string> = {};
+
+  // Generate all shadow variations
+  Object.entries(config.shape.shadows).forEach(([key, value]) => {
+    utilities[`shadow-${key}`] = value;
+  });
+
+  return { boxShadow: utilities };
+}
+
+// Adjust shadow color based on theme
+export function getThemedShadow(
+  shadowLevel: keyof ShapeConfig['shadows'],
+  color: string,
+  opacity: number = 0.2,
+  config: ShapeSystemConfig = defaultShapeSystemConfig
+): string {
+  // Extract the shadow pattern without the color
+  let shadow = config.shape.shadows[shadowLevel];
+
+  // Replace rgba or hex color with the provided color
+  const rgbaRegex = /rgba\([^)]+\)/g;
+  const hexRegex = /#[0-9a-fA-F]{3,8}/g;
+
+  // Create the new rgba color
+  const rgbaColor = `rgba(${hexToRgb(color)}, ${opacity})`;
+
+  if (rgbaRegex.test(shadow)) {
+    shadow = shadow.replace(rgbaRegex, rgbaColor);
+  } else if (hexRegex.test(shadow)) {
+    shadow = shadow.replace(hexRegex, rgbaColor);
+  }
+
+  return shadow;
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex: string): string {
+  // Remove # if present
+  hex = hex.replace('#', '');
+
+  // Convert 3-digit hex to 6-digit
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((char) => char + char)
+      .join('');
+  }
+
+  // Parse the hex values
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return `${r}, ${g}, ${b}`;
+}
+
+
+================================================================================
+
+# .\theme\config\theme.ts
+
+// config/themes.ts (expanded)
+import { ColorName, ColorShades, TailwindColors } from '../types/colors';
+import { Theme, ThemeMode, ThemePalette, ThemeColors } from '../types/theme';
+import tailwindColors from '../tailwind-colors.json';
+
+// Type assertion with our well-defined interface
+export const colors = tailwindColors as TailwindColors;
+
+export const getColorPalette = (colorName: ColorName): ColorShades => {
+  return colors[colorName];
+};
+
+// Define our base palettes
+const lightPalette: ThemePalette = {
+  mainColorName: 'blue',
+  accentColorName: 'indigo',
+  neutralColorName: 'slate',
+};
+
+const darkPalette: ThemePalette = {
+  mainColorName: 'blue',
+  accentColorName: 'indigo',
+  neutralColorName: 'slate',
+};
+
+// Enhanced function to create theme colors with all the new color variants
+function createThemeColors(
+  palette: ThemePalette,
+  isDark: boolean
+): ThemeColors {
+  const { mainColorName, accentColorName, neutralColorName } = palette;
+
+  if (isDark) {
+    return {
+      // Background colors
+      background: getColorPalette(neutralColorName)[950],
+      backgroundMuted: getColorPalette(neutralColorName)[900],
+      backgroundSubtle: getColorPalette(neutralColorName)[800],
+
+      // Text colors
+      text: getColorPalette(neutralColorName)[100],
+      textSecondary: getColorPalette(neutralColorName)[300],
+      textMuted: getColorPalette(neutralColorName)[400],
+
+      // Interactive element colors - primary
+      primary: getColorPalette(mainColorName)[500],
+      primaryHover: getColorPalette(mainColorName)[400],
+      primaryActive: getColorPalette(mainColorName)[300],
+      primarySubtle: getColorPalette(mainColorName)[900], // New
+      primaryOutline: getColorPalette(mainColorName)[800], // New
+
+      // Interactive element colors - secondary
+      secondary: getColorPalette(accentColorName)[500],
+      secondaryHover: getColorPalette(accentColorName)[400],
+      secondaryActive: getColorPalette(accentColorName)[300],
+      secondarySubtle: getColorPalette(accentColorName)[900], // New
+      secondaryOutline: getColorPalette(accentColorName)[800], // New
+
+      // Feedback colors
+      success: getColorPalette('green')[500],
+      successSubtle: getColorPalette('green')[900], // New
+      error: getColorPalette('red')[500],
+      errorSubtle: getColorPalette('red')[900], // New
+      warning: getColorPalette('amber')[400],
+      warningSubtle: getColorPalette('amber')[900], // New
+      info: getColorPalette('sky')[400],
+      infoSubtle: getColorPalette('sky')[900], // New
+
+      // Border colors
+      border: getColorPalette(neutralColorName)[700],
+      borderFocus: getColorPalette(mainColorName)[400],
+
+      // Overlay colors
+      overlay: 'rgba(0, 0, 0, 0.7)',
+    };
+  } else {
+    // Light theme
+    return {
+      // Background colors
+      background: '#ffffff',
+      backgroundMuted: getColorPalette(neutralColorName)[50],
+      backgroundSubtle: getColorPalette(neutralColorName)[100],
+
+      // Text colors
+      text: getColorPalette(neutralColorName)[900],
+      textSecondary: getColorPalette(neutralColorName)[700],
+      textMuted: getColorPalette(neutralColorName)[500],
+
+      // Interactive element colors - primary
+      primary: getColorPalette(mainColorName)[600],
+      primaryHover: getColorPalette(mainColorName)[700],
+      primaryActive: getColorPalette(mainColorName)[800],
+      primarySubtle: getColorPalette(mainColorName)[50], // New
+      primaryOutline: getColorPalette(mainColorName)[100], // New
+
+      // Interactive element colors - secondary
+      secondary: getColorPalette(accentColorName)[600],
+      secondaryHover: getColorPalette(accentColorName)[700],
+      secondaryActive: getColorPalette(accentColorName)[800],
+      secondarySubtle: getColorPalette(accentColorName)[50], // New
+      secondaryOutline: getColorPalette(accentColorName)[100], // New
+
+      // Feedback colors
+      success: getColorPalette('green')[600],
+      successSubtle: getColorPalette('green')[50], // New
+      error: getColorPalette('red')[600],
+      errorSubtle: getColorPalette('red')[50], // New
+      warning: getColorPalette('amber')[500],
+      warningSubtle: getColorPalette('amber')[50], // New
+      info: getColorPalette('sky')[500],
+      infoSubtle: getColorPalette('sky')[50], // New
+
+      // Border colors
+      border: getColorPalette(neutralColorName)[200],
+      borderFocus: getColorPalette(mainColorName)[500],
+
+      // Overlay colors
+      overlay: 'rgba(0, 0, 0, 0.5)',
+    };
+  }
+}
+
+// Create the default light theme with enhanced colors
+export const lightTheme: Theme = {
+  id: 'light',
+  name: 'Light',
+  palette: lightPalette,
+  colors: createThemeColors(lightPalette, false),
+  description: 'Default light theme with blue primary color',
+};
+
+// Create the default dark theme with enhanced colors
+export const darkTheme: Theme = {
+  id: 'dark',
+  name: 'Dark',
+  palette: darkPalette,
+  colors: createThemeColors(darkPalette, true),
+  description: 'Default dark theme with blue primary color',
+};
+
+// Theme customization utility
+export function createCustomTheme(
+  id: string,
+  name: string,
+  options: {
+    mainColorName: ColorName;
+    accentColorName: ColorName;
+    neutralColorName: ColorName;
+    mode: 'light' | 'dark';
+    category?: string;
+    description?: string;
+  }
+): Theme {
+  const palette: ThemePalette = {
+    mainColorName: options.mainColorName,
+    accentColorName: options.accentColorName,
+    neutralColorName: options.neutralColorName,
+  };
+
+  return {
+    id,
+    name,
+    palette,
+    colors: createThemeColors(palette, options.mode === 'dark'),
+    category: options.category,
+    description: options.description,
+  };
+}
+
+// Export a map of all available themes (expanded with custom themes)
+export const themes: Record<string, Theme> = {
+  light: lightTheme,
+  dark: darkTheme,
+  // Add some pre-built custom themes
+  purple: createCustomTheme('purple', 'Purple', {
+    mainColorName: 'purple',
+    accentColorName: 'violet',
+    neutralColorName: 'slate',
+    mode: 'light',
+    category: 'Custom',
+  }),
+  emerald: createCustomTheme('emerald', 'Emerald', {
+    mainColorName: 'emerald',
+    accentColorName: 'teal',
+    neutralColorName: 'gray',
+    mode: 'light',
+    category: 'Custom',
+  }),
+  amber: createCustomTheme('amber', 'Amber', {
+    mainColorName: 'amber',
+    accentColorName: 'orange',
+    neutralColorName: 'stone',
+    mode: 'light',
+    category: 'Custom',
+  }),
+  // Dark variants
+  purpleDark: createCustomTheme('purpleDark', 'Purple Dark', {
+    mainColorName: 'purple',
+    accentColorName: 'violet',
+    neutralColorName: 'slate',
+    mode: 'dark',
+    category: 'Custom',
+  }),
+  emeraldDark: createCustomTheme('emeraldDark', 'Emerald Dark', {
+    mainColorName: 'emerald',
+    accentColorName: 'teal',
+    neutralColorName: 'gray',
+    mode: 'dark',
+    category: 'Custom',
+  }),
+  amberDark: createCustomTheme('amberDark', 'Amber Dark', {
+    mainColorName: 'amber',
+    accentColorName: 'orange',
+    neutralColorName: 'stone',
+    mode: 'dark',
+    category: 'Custom',
+  }),
+};
+
+// Default theme mode
+export const defaultThemeMode: ThemeMode = 'system';
+
+// Helper to get the theme based on mode and system preference
+export const getThemeByMode = (
+  mode: ThemeMode,
+  systemPrefersDark: boolean
+): Theme => {
+  switch (mode) {
+    case 'light':
+      return lightTheme;
+    case 'dark':
+      return darkTheme;
+    case 'system':
+      return systemPrefersDark ? darkTheme : lightTheme;
+    default:
+      return lightTheme;
+  }
+};
+
+// Generate color palette for documentation
+export function generateColorPalette(theme: Theme): Record<string, string> {
+  const { mainColorName, accentColorName, neutralColorName } = theme.palette;
+  const mainPalette = getColorPalette(mainColorName);
+  const accentPalette = getColorPalette(accentColorName);
+  const neutralPalette = getColorPalette(neutralColorName);
+
+  // Creates a flattened map of all colors for documentation
+  return {
+    // All theme colors with their hex values
+    ...theme.colors,
+
+    // Add main palette shades
+    [`${mainColorName}50`]: mainPalette[50],
+    [`${mainColorName}100`]: mainPalette[100],
+    [`${mainColorName}200`]: mainPalette[200],
+    [`${mainColorName}300`]: mainPalette[300],
+    [`${mainColorName}400`]: mainPalette[400],
+    [`${mainColorName}500`]: mainPalette[500],
+    [`${mainColorName}600`]: mainPalette[600],
+    [`${mainColorName}700`]: mainPalette[700],
+    [`${mainColorName}800`]: mainPalette[800],
+    [`${mainColorName}900`]: mainPalette[900],
+    [`${mainColorName}950`]: mainPalette[950],
+
+    // Add accent palette shades
+    [`${accentColorName}50`]: accentPalette[50],
+    [`${accentColorName}100`]: accentPalette[100],
+    [`${accentColorName}200`]: accentPalette[200],
+    [`${accentColorName}300`]: accentPalette[300],
+    [`${accentColorName}400`]: accentPalette[400],
+    [`${accentColorName}500`]: accentPalette[500],
+    [`${accentColorName}600`]: accentPalette[600],
+    [`${accentColorName}700`]: accentPalette[700],
+    [`${accentColorName}800`]: accentPalette[800],
+    [`${accentColorName}900`]: accentPalette[900],
+    [`${accentColorName}950`]: accentPalette[950],
+
+    // Add neutral palette shades
+    [`${neutralColorName}50`]: neutralPalette[50],
+    [`${neutralColorName}100`]: neutralPalette[100],
+    [`${neutralColorName}200`]: neutralPalette[200],
+    [`${neutralColorName}300`]: neutralPalette[300],
+    [`${neutralColorName}400`]: neutralPalette[400],
+    [`${neutralColorName}500`]: neutralPalette[500],
+    [`${neutralColorName}600`]: neutralPalette[600],
+    [`${neutralColorName}700`]: neutralPalette[700],
+    [`${neutralColorName}800`]: neutralPalette[800],
+    [`${neutralColorName}900`]: neutralPalette[900],
+    [`${neutralColorName}950`]: neutralPalette[950],
+  };
+}
+
+// Helper to generate a color scheme CSS variables object
+export function generateThemeCssVars(theme: Theme): Record<string, string> {
+  const flatPalette = generateColorPalette(theme);
+  const cssVars: Record<string, string> = {};
+
+  // Convert all colors to CSS variables
+  Object.entries(flatPalette).forEach(([key, value]) => {
+    cssVars[`--color-${key}`] = value;
+  });
+
+  return cssVars;
+}
+
+// Usage example: Apply theme CSS variables to an element
+export function applyThemeToCssVars(
+  theme: Theme,
+  element: HTMLElement = document.documentElement
+): void {
+  const cssVars = generateThemeCssVars(theme);
+
+  Object.entries(cssVars).forEach(([prop, value]) => {
+    element.style.setProperty(prop, value);
+  });
+}
+
+
+================================================================================
+
+# .\theme\tailwind-colors.json
+
+{
+  "black": "#000",
+  "white": "#fff",
+  "transparent": "transparent",
+  "current": "currentColor",
+  "inherit": "inherit",
+  "slate": {
+    "50": "#f8fafc",
+    "100": "#f1f5f9",
+    "200": "#e2e8f0",
+    "300": "#cbd5e1",
+    "400": "#94a3b8",
+    "500": "#64748b",
+    "600": "#475569",
+    "700": "#334155",
+    "800": "#1e293b",
+    "900": "#0f172a",
+    "950": "#020617"
+  },
+  "gray": {
+    "50": "#f9fafb",
+    "100": "#f3f4f6",
+    "200": "#e5e7eb",
+    "300": "#d1d5db",
+    "400": "#9ca3af",
+    "500": "#6b7280",
+    "600": "#4b5563",
+    "700": "#374151",
+    "800": "#1f2937",
+    "900": "#111827",
+    "950": "#030712"
+  },
+  "zinc": {
+    "50": "#fafafa",
+    "100": "#f4f4f5",
+    "200": "#e4e4e7",
+    "300": "#d4d4d8",
+    "400": "#a1a1aa",
+    "500": "#71717a",
+    "600": "#52525b",
+    "700": "#3f3f46",
+    "800": "#27272a",
+    "900": "#18181b",
+    "950": "#09090b"
+  },
+  "neutral": {
+    "50": "#fafafa",
+    "100": "#f5f5f5",
+    "200": "#e5e5e5",
+    "300": "#d4d4d4",
+    "400": "#a3a3a3",
+    "500": "#737373",
+    "600": "#525252",
+    "700": "#404040",
+    "800": "#262626",
+    "900": "#171717",
+    "950": "#0a0a0a"
+  },
+  "stone": {
+    "50": "#fafaf9",
+    "100": "#f5f5f4",
+    "200": "#e7e5e4",
+    "300": "#d6d3d1",
+    "400": "#a8a29e",
+    "500": "#78716c",
+    "600": "#57534e",
+    "700": "#44403c",
+    "800": "#292524",
+    "900": "#1c1917",
+    "950": "#0c0a09"
+  },
+  "red": {
+    "50": "#fef2f2",
+    "100": "#fee2e2",
+    "200": "#fecaca",
+    "300": "#fca5a5",
+    "400": "#f87171",
+    "500": "#ef4444",
+    "600": "#dc2626",
+    "700": "#b91c1c",
+    "800": "#991b1b",
+    "900": "#7f1d1d",
+    "950": "#450a0a"
+  },
+  "orange": {
+    "50": "#fff7ed",
+    "100": "#ffedd5",
+    "200": "#fed7aa",
+    "300": "#fdba74",
+    "400": "#fb923c",
+    "500": "#f97316",
+    "600": "#ea580c",
+    "700": "#c2410c",
+    "800": "#9a3412",
+    "900": "#7c2d12",
+    "950": "#431407"
+  },
+  "amber": {
+    "50": "#fffbeb",
+    "100": "#fef3c7",
+    "200": "#fde68a",
+    "300": "#fcd34d",
+    "400": "#fbbf24",
+    "500": "#f59e0b",
+    "600": "#d97706",
+    "700": "#b45309",
+    "800": "#92400e",
+    "900": "#78350f",
+    "950": "#451a03"
+  },
+  "yellow": {
+    "50": "#fefce8",
+    "100": "#fef9c3",
+    "200": "#fef08a",
+    "300": "#fde047",
+    "400": "#facc15",
+    "500": "#eab308",
+    "600": "#ca8a04",
+    "700": "#a16207",
+    "800": "#854d0e",
+    "900": "#713f12",
+    "950": "#422006"
+  },
+  "lime": {
+    "50": "#f7fee7",
+    "100": "#ecfccb",
+    "200": "#d9f99d",
+    "300": "#bef264",
+    "400": "#a3e635",
+    "500": "#84cc16",
+    "600": "#65a30d",
+    "700": "#4d7c0f",
+    "800": "#3f6212",
+    "900": "#365314",
+    "950": "#1a2e05"
+  },
+  "green": {
+    "50": "#f0fdf4",
+    "100": "#dcfce7",
+    "200": "#bbf7d0",
+    "300": "#86efac",
+    "400": "#4ade80",
+    "500": "#22c55e",
+    "600": "#16a34a",
+    "700": "#15803d",
+    "800": "#166534",
+    "900": "#14532d",
+    "950": "#052e16"
+  },
+  "emerald": {
+    "50": "#ecfdf5",
+    "100": "#d1fae5",
+    "200": "#a7f3d0",
+    "300": "#6ee7b7",
+    "400": "#34d399",
+    "500": "#10b981",
+    "600": "#059669",
+    "700": "#047857",
+    "800": "#065f46",
+    "900": "#064e3b",
+    "950": "#022c22"
+  },
+  "teal": {
+    "50": "#f0fdfa",
+    "100": "#ccfbf1",
+    "200": "#99f6e4",
+    "300": "#5eead4",
+    "400": "#2dd4bf",
+    "500": "#14b8a6",
+    "600": "#0d9488",
+    "700": "#0f766e",
+    "800": "#115e59",
+    "900": "#134e4a",
+    "950": "#042f2e"
+  },
+  "cyan": {
+    "50": "#ecfeff",
+    "100": "#cffafe",
+    "200": "#a5f3fc",
+    "300": "#67e8f9",
+    "400": "#22d3ee",
+    "500": "#06b6d4",
+    "600": "#0891b2",
+    "700": "#0e7490",
+    "800": "#155e75",
+    "900": "#164e63",
+    "950": "#083344"
+  },
+  "sky": {
+    "50": "#f0f9ff",
+    "100": "#e0f2fe",
+    "200": "#bae6fd",
+    "300": "#7dd3fc",
+    "400": "#38bdf8",
+    "500": "#0ea5e9",
+    "600": "#0284c7",
+    "700": "#0369a1",
+    "800": "#075985",
+    "900": "#0c4a6e",
+    "950": "#082f49"
+  },
+  "blue": {
+    "50": "#eff6ff",
+    "100": "#dbeafe",
+    "200": "#bfdbfe",
+    "300": "#93c5fd",
+    "400": "#60a5fa",
+    "500": "#3b82f6",
+    "600": "#2563eb",
+    "700": "#1d4ed8",
+    "800": "#1e40af",
+    "900": "#1e3a8a",
+    "950": "#172554"
+  },
+  "indigo": {
+    "50": "#eef2ff",
+    "100": "#e0e7ff",
+    "200": "#c7d2fe",
+    "300": "#a5b4fc",
+    "400": "#818cf8",
+    "500": "#6366f1",
+    "600": "#4f46e5",
+    "700": "#4338ca",
+    "800": "#3730a3",
+    "900": "#312e81",
+    "950": "#1e1b4b"
+  },
+  "violet": {
+    "50": "#f5f3ff",
+    "100": "#ede9fe",
+    "200": "#ddd6fe",
+    "300": "#c4b5fd",
+    "400": "#a78bfa",
+    "500": "#8b5cf6",
+    "600": "#7c3aed",
+    "700": "#6d28d9",
+    "800": "#5b21b6",
+    "900": "#4c1d95",
+    "950": "#2e1065"
+  },
+  "purple": {
+    "50": "#faf5ff",
+    "100": "#f3e8ff",
+    "200": "#e9d5ff",
+    "300": "#d8b4fe",
+    "400": "#c084fc",
+    "500": "#a855f7",
+    "600": "#9333ea",
+    "700": "#7e22ce",
+    "800": "#6b21a8",
+    "900": "#581c87",
+    "950": "#3b0764"
+  },
+  "fuchsia": {
+    "50": "#fdf4ff",
+    "100": "#fae8ff",
+    "200": "#f5d0fe",
+    "300": "#f0abfc",
+    "400": "#e879f9",
+    "500": "#d946ef",
+    "600": "#c026d3",
+    "700": "#a21caf",
+    "800": "#86198f",
+    "900": "#701a75",
+    "950": "#4a044e"
+  },
+  "pink": {
+    "50": "#fdf2f8",
+    "100": "#fce7f3",
+    "200": "#fbcfe8",
+    "300": "#f9a8d4",
+    "400": "#f472b6",
+    "500": "#ec4899",
+    "600": "#db2777",
+    "700": "#be185d",
+    "800": "#9d174d",
+    "900": "#831843",
+    "950": "#500724"
+  },
+  "rose": {
+    "50": "#fff1f2",
+    "100": "#ffe4e6",
+    "200": "#fecdd3",
+    "300": "#fda4af",
+    "400": "#fb7185",
+    "500": "#f43f5e",
+    "600": "#e11d48",
+    "700": "#be123c",
+    "800": "#9f1239",
+    "900": "#881337",
+    "950": "#4c0519"
+  }
+}
+
+
+================================================================================
+
+# .\theme\tailwind.config.ts
+
+// tailwind.config.ts
+
+// Define the structure of our color palette more precisely
+
+export default {
+  content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+
+
+================================================================================
+
+# .\theme\types\accessibility.ts
+
+// types/accessibility.ts
+
+import { Theme } from './theme';
+
+export interface AccessibilityChecks {
+  // WCAG 2.1 AA Standard
+  minimumTextContrast: number; // 4.5:1 for normal text
+  minimumLargeTextContrast: number; // 3:1 for large text
+  minimumUIContrast: number; // 3:1 for UI components
+}
+
+// Default accessibility requirements
+export const defaultAccessibilityChecks: AccessibilityChecks = {
+  minimumTextContrast: 4.5,
+  minimumLargeTextContrast: 3.0,
+  minimumUIContrast: 3.0,
+};
+
+// Calculate relative luminance for a color (WCAG formula)
+export function getLuminance(hexColor: string): number {
+  // Remove # if present
+  const hex = hexColor.startsWith('#') ? hexColor.slice(1) : hexColor;
+
+  // Convert hex to RGB
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+  // Calculate RGB values
+  const R = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+  const G = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+  const B = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+
+  // Calculate luminance
+  return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+}
+
+// Calculate contrast ratio between two colors
+export function getContrastRatio(color1: string, color2: string): number {
+  const luminance1 = getLuminance(color1);
+  const luminance2 = getLuminance(color2);
+
+  // Calculate contrast ratio
+  const brightest = Math.max(luminance1, luminance2);
+  const darkest = Math.min(luminance1, luminance2);
+
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+// Check if a theme meets accessibility standards
+export function validateThemeAccessibility(
+  theme: Theme,
+  checks: AccessibilityChecks = defaultAccessibilityChecks
+): { valid: boolean; issues: string[] } {
+  const issues: string[] = [];
+
+  // Check text contrast against backgrounds
+  const textContrastBg = getContrastRatio(
+    theme.colors.text,
+    theme.colors.background
+  );
+  if (textContrastBg < checks.minimumTextContrast) {
+    issues.push(
+      `Text contrast ratio (${textContrastBg.toFixed(
+        2
+      )}) with background is below ${checks.minimumTextContrast}`
+    );
+  }
+
+  const textSecondaryContrastBg = getContrastRatio(
+    theme.colors.textSecondary,
+    theme.colors.background
+  );
+  if (textSecondaryContrastBg < checks.minimumTextContrast) {
+    issues.push(
+      `Secondary text contrast ratio (${textSecondaryContrastBg.toFixed(
+        2
+      )}) with background is below ${checks.minimumTextContrast}`
+    );
+  }
+
+  // Check interactive elements
+  const primaryContrastBg = getContrastRatio(
+    theme.colors.primary,
+    theme.colors.background
+  );
+  if (primaryContrastBg < checks.minimumUIContrast) {
+    issues.push(
+      `Primary button contrast ratio (${primaryContrastBg.toFixed(
+        2
+      )}) with background is below ${checks.minimumUIContrast}`
+    );
+  }
+
+  // Add more checks as needed for other combinations
+
+  return {
+    valid: issues.length === 0,
+    issues,
+  };
+}
+
+
+================================================================================
+
+# .\theme\types\colors.ts
+
+export interface ColorShades {
+  50: string;
+  100: string;
+  200: string;
+  300: string;
+  400: string;
+  500: string;
+  600: string;
+  700: string;
+  800: string;
+  900: string;
+  950: string;
+}
+
+// Define the structure of our colors object
+export interface TailwindColors {
+  black: string;
+  white: string;
+  transparent: string;
+  current: string;
+  inherit: string;
+  slate: ColorShades;
+  gray: ColorShades;
+  zinc: ColorShades;
+  neutral: ColorShades;
+  stone: ColorShades;
+  red: ColorShades;
+  orange: ColorShades;
+  amber: ColorShades;
+  yellow: ColorShades;
+  lime: ColorShades;
+  green: ColorShades;
+  emerald: ColorShades;
+  teal: ColorShades;
+  cyan: ColorShades;
+  sky: ColorShades;
+  blue: ColorShades;
+  indigo: ColorShades;
+  violet: ColorShades;
+  purple: ColorShades;
+  fuchsia: ColorShades;
+  pink: ColorShades;
+  rose: ColorShades;
+}
+
+// Define valid color names
+export type ColorName = keyof Omit<
+  TailwindColors,
+  'black' | 'white' | 'transparent' | 'current' | 'inherit'
+>;
+
+
+================================================================================
+
+# .\theme\types\shape.ts
+
+// types/shape.ts
+// Defines border widths, styles, radius values, and shadow system
+
+// Border width options
+export interface BorderWidths {
+  none: string;
+  thin: string;
+  light: string;
+  normal: string;
+  medium: string;
+  thick: string;
+  heavy: string;
+}
+
+// Default border width values
+export const defaultBorderWidths: BorderWidths = {
+  none: '0px',
+  thin: '1px',
+  light: '2px',
+  normal: '3px',
+  medium: '4px',
+  thick: '6px',
+  heavy: '8px',
+};
+
+// Border style options
+export type BorderStyle =
+  | 'none'
+  | 'solid'
+  | 'dashed'
+  | 'dotted'
+  | 'double'
+  | 'groove'
+  | 'ridge'
+  | 'inset'
+  | 'outset';
+
+// Border radius (roundness)
+export interface BorderRadius {
+  none: string;
+  xs: string; // Extra small
+  sm: string; // Small
+  md: string; // Medium
+  lg: string; // Large
+  xl: string; // Extra large
+  '2xl': string; // 2x large
+  '3xl': string; // 3x large
+  full: string; // Fully rounded (circle)
+}
+
+// Default border radius values
+export const defaultBorderRadius: BorderRadius = {
+  none: '0px',
+  xs: '0.125rem', // 2px
+  sm: '0.25rem', // 4px
+  md: '0.375rem', // 6px
+  lg: '0.5rem', // 8px
+  xl: '0.75rem', // 12px
+  '2xl': '1rem', // 16px
+  '3xl': '1.5rem', // 24px
+  full: '9999px', // Circle/pill
+};
+
+// Shadow (elevation) levels
+export interface Shadows {
+  none: string;
+  xs: string; // Extra small
+  sm: string; // Small
+  md: string; // Medium
+  lg: string; // Large
+  xl: string; // Extra large
+  '2xl': string; // 2x large
+  '3xl': string; // 3x large
+  inner: string; // Inner shadow
+  outline: string; // Focus outline
+}
+
+// Default shadow values
+export const defaultShadows: Shadows = {
+  none: 'none',
+  xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  sm: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+  '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
+  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+  outline: '0 0 0 3px rgba(59, 130, 246, 0.5)', // Uses primary blue by default
+};
+
+// Complete shape configuration
+export interface ShapeConfig {
+  borderWidths: BorderWidths;
+  borderRadius: BorderRadius;
+  shadows: Shadows;
+}
+
+// Default shape configuration
+export const defaultShapeConfig: ShapeConfig = {
+  borderWidths: defaultBorderWidths,
+  borderRadius: defaultBorderRadius,
+  shadows: defaultShadows,
+};
+
+// Semantic shape variants
+export interface ShapeVariants {
+  // Button shape variants
+  buttonRadius: keyof BorderRadius;
+  buttonElevation: keyof Shadows;
+
+  // Card shape variants
+  cardRadius: keyof BorderRadius;
+  cardElevation: keyof Shadows;
+  cardBorder: keyof BorderWidths;
+
+  // Input shape variants
+  inputRadius: keyof BorderRadius;
+  inputBorder: keyof BorderWidths;
+
+  // Dialog/modal shape variants
+  dialogRadius: keyof BorderRadius;
+  dialogElevation: keyof Shadows;
+
+  // Menu/dropdown shape variants
+  menuRadius: keyof BorderRadius;
+  menuElevation: keyof Shadows;
+
+  // Tooltip shape variants
+  tooltipRadius: keyof BorderRadius;
+  tooltipElevation: keyof Shadows;
+}
+
+// Default shape variants
+export const defaultShapeVariants: ShapeVariants = {
+  buttonRadius: 'md',
+  buttonElevation: 'sm',
+
+  cardRadius: 'lg',
+  cardElevation: 'md',
+  cardBorder: 'none',
+
+  inputRadius: 'md',
+  inputBorder: 'light',
+
+  dialogRadius: 'lg',
+  dialogElevation: 'xl',
+
+  menuRadius: 'md',
+  menuElevation: 'lg',
+
+  tooltipRadius: 'sm',
+  tooltipElevation: 'sm',
+};
+
+
+================================================================================
+
+# .\theme\types\spacing.ts
+
+// types/spacing.ts
+// Defines the spacing system for consistent margins, padding, and layout
+
+// Basic spacing scale (in rem units)
+export interface SpacingScale {
+  px: string; // 1px
+  0: string; // 0px
+  0.5: string; // 2px
+  1: string; // 4px
+  1.5: string; // 6px
+  2: string; // 8px
+  2.5: string; // 10px
+  3: string; // 12px
+  3.5: string; // 14px
+  4: string; // 16px
+  5: string; // 20px
+  6: string; // 24px
+  7: string; // 28px
+  8: string; // 32px
+  9: string; // 36px
+  10: string; // 40px
+  11: string; // 44px
+  12: string; // 48px
+  14: string; // 56px
+  16: string; // 64px
+  20: string; // 80px
+  24: string; // 96px
+  28: string; // 112px
+  32: string; // 128px
+  36: string; // 144px
+  40: string; // 160px
+  44: string; // 176px
+  48: string; // 192px
+  52: string; // 208px
+  56: string; // 224px
+  60: string; // 240px
+  64: string; // 256px
+  72: string; // 288px
+  80: string; // 320px
+  96: string; // 384px
+}
+
+// Default spacing scale values
+export const defaultSpacing: SpacingScale = {
+  px: '1px',
+  0: '0',
+  0.5: '0.125rem', // 2px
+  1: '0.25rem', // 4px
+  1.5: '0.375rem', // 6px
+  2: '0.5rem', // 8px
+  2.5: '0.625rem', // 10px
+  3: '0.75rem', // 12px
+  3.5: '0.875rem', // 14px
+  4: '1rem', // 16px
+  5: '1.25rem', // 20px
+  6: '1.5rem', // 24px
+  7: '1.75rem', // 28px
+  8: '2rem', // 32px
+  9: '2.25rem', // 36px
+  10: '2.5rem', // 40px
+  11: '2.75rem', // 44px
+  12: '3rem', // 48px
+  14: '3.5rem', // 56px
+  16: '4rem', // 64px
+  20: '5rem', // 80px
+  24: '6rem', // 96px
+  28: '7rem', // 112px
+  32: '8rem', // 128px
+  36: '9rem', // 144px
+  40: '10rem', // 160px
+  44: '11rem', // 176px
+  48: '12rem', // 192px
+  52: '13rem', // 208px
+  56: '14rem', // 224px
+  60: '15rem', // 240px
+  64: '16rem', // 256px
+  72: '18rem', // 288px
+  80: '20rem', // 320px
+  96: '24rem', // 384px
+};
+
+// Space between components
+export type ComponentSpacing =
+  | 'none'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl';
+
+// Mapping of component spacing to spacing scale values
+export const componentSpacingValues: Record<
+  ComponentSpacing,
+  keyof SpacingScale
+> = {
+  none: 0,
+  xs: 1,
+  sm: 2,
+  md: 4,
+  lg: 6,
+  xl: 8,
+  '2xl': 12,
+  '3xl': 16,
+  '4xl': 24,
+};
+
+// Semantic spacing for specific UI patterns
+export interface SemanticSpacing {
+  // Inset padding for containers
+  containerPadding: keyof SpacingScale;
+  // Space between related elements
+  elementSpacing: keyof SpacingScale;
+  // Space between unrelated element groups
+  sectionSpacing: keyof SpacingScale;
+  // Space at page/container margins
+  pagePadding: keyof SpacingScale;
+  // Space between stacked components
+  stackSpacing: keyof SpacingScale;
+  // Space between inline elements
+  inlineSpacing: keyof SpacingScale;
+}
+
+// Default semantic spacing
+export const defaultSemanticSpacing: SemanticSpacing = {
+  containerPadding: 6,
+  elementSpacing: 4,
+  sectionSpacing: 12,
+  pagePadding: 6,
+  stackSpacing: 4,
+  inlineSpacing: 2,
+};
+
+// Layout breakpoints for responsive design
+export interface Breakpoints {
+  xs: string; // Extra small screens (phones)
+  sm: string; // Small screens (large phones, small tablets)
+  md: string; // Medium screens (tablets)
+  lg: string; // Large screens (desktops)
+  xl: string; // Extra large screens (large desktops)
+  '2xl': string; // Wide screens
+}
+
+// Default breakpoint values
+export const defaultBreakpoints: Breakpoints = {
+  xs: '320px',
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+  '2xl': '1536px',
+};
+
+// Grid system configuration
+export interface GridSystem {
+  // Number of columns in the grid
+  columns: number;
+  // Gutter size between columns
+  gutter: keyof SpacingScale;
+  // Container max width at each breakpoint
+  containerMaxWidth: Record<keyof Breakpoints, string>;
+  // Container padding at each breakpoint
+  containerPadding: Record<keyof Breakpoints, keyof SpacingScale>;
+}
+
+// Default grid system
+export const defaultGridSystem: GridSystem = {
+  columns: 12,
+  gutter: 4,
+  containerMaxWidth: {
+    xs: '100%',
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+    xl: '1280px',
+    '2xl': '1536px',
+  },
+  containerPadding: {
+    xs: 4,
+    sm: 6,
+    md: 6,
+    lg: 8,
+    xl: 8,
+    '2xl': 8,
+  },
+};
+
+// Aspect ratios for consistent media containers
+export type AspectRatio =
+  | '1/1'
+  | '4/3'
+  | '16/9'
+  | '21/9'
+  | '2/3'
+  | '3/2'
+  | '3/4'
+  | '9/16';
+
+
+================================================================================
+
+# .\theme\types\theme.ts
+
+// types/theme.ts (expanded)
+import { ColorName } from './colors';
+
+// Extended semantic color roles
+export interface ThemeColors {
+  // Backgrounds
+  background: string;
+  backgroundMuted: string;
+  backgroundSubtle: string;
+
+  // Content
+  text: string;
+  textSecondary: string;
+  textMuted: string;
+
+  // Interactive elements
+  primary: string;
+  primaryHover: string;
+  primaryActive: string;
+  primarySubtle: string; // New - for subtle primary backgrounds
+  primaryOutline: string; // New - for outlined variants
+
+  secondary: string;
+  secondaryHover: string;
+  secondaryActive: string;
+  secondarySubtle: string; // New - for subtle secondary backgrounds
+  secondaryOutline: string; // New - for outlined variants
+
+  // Feedback colors
+  success: string;
+  successSubtle: string; // New
+  error: string;
+  errorSubtle: string; // New
+  warning: string;
+  warningSubtle: string; // New
+  info: string;
+  infoSubtle: string; // New
+
+  // Border colors
+  border: string;
+  borderFocus: string;
+
+  // Overlay colors
+  overlay: string;
+}
+
+// Base palette defines what colors we're using for our themes
+export interface ThemePalette {
+  // Colors from our existing palette to use
+  mainColorName: ColorName;
+  accentColorName: ColorName;
+  neutralColorName: ColorName;
+
+  // Additional custom colors that might not be in the Tailwind palette
+  customColors?: Record<string, string>;
+}
+
+// Actual theme configuration that combines palette with specific color assignments
+export interface Theme {
+  id: string;
+  name: string;
+  palette: ThemePalette;
+  colors: ThemeColors;
+  category?: string; // Optional category for grouping themes
+  description?: string; // Optional description
+}
+
+// Theme mode (light, dark, system, etc.)
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+// Theme context state
+export interface ThemeContextState {
+  currentTheme: Theme;
+  mode: ThemeMode;
+  setTheme: (theme: Theme) => void;
+  setMode: (mode: ThemeMode) => void;
+  themes: Record<string, Theme>;
+}
+
+
+================================================================================
+
+# .\theme\types\typography.ts
+
+// types/typography.ts
+export interface FontFamily {
+  sans: string[];
+  serif: string[];
+  mono: string[];
+  // Custom font families can be added here
+}
+
+export interface FontSize {
+  xs: string;
+  sm: string;
+  base: string;
+  lg: string;
+  xl: string;
+  '2xl': string;
+  '3xl': string;
+  '4xl': string;
+  '5xl': string;
+  '6xl': string;
+  '7xl': string;
+  '8xl': string;
+  '9xl': string;
+}
+
+export interface FontWeight {
+  thin: number;
+  extralight: number;
+  light: number;
+  normal: number;
+  medium: number;
+  semibold: number;
+  bold: number;
+  extrabold: number;
+  black: number;
+}
+
+export interface LineHeight {
+  none: string;
+  tight: string;
+  snug: string;
+  normal: string;
+  relaxed: string;
+  loose: string;
+  // Specific line heights
+  '3': string;
+  '4': string;
+  '5': string;
+  '6': string;
+  '7': string;
+  '8': string;
+  '9': string;
+  '10': string;
+}
+
+export interface LetterSpacing {
+  tighter: string;
+  tight: string;
+  normal: string;
+  wide: string;
+  wider: string;
+  widest: string;
+}
+
+// Comprehensive typography settings
+export interface Typography {
+  fontFamily: FontFamily;
+  fontSize: FontSize;
+  fontWeight: FontWeight;
+  lineHeight: LineHeight;
+  letterSpacing: LetterSpacing;
+}
+
+// Text styles for different purposes (headings, body, etc.)
+export interface TextStyles {
+  h1: TextStyle;
+  h2: TextStyle;
+  h3: TextStyle;
+  h4: TextStyle;
+  h5: TextStyle;
+  h6: TextStyle;
+  subtitle1: TextStyle;
+  subtitle2: TextStyle;
+  body1: TextStyle;
+  body2: TextStyle;
+  button: TextStyle;
+  caption: TextStyle;
+  overline: TextStyle;
+  code: TextStyle;
+}
+
+// Properties of an individual text style
+export interface TextStyle {
+  fontFamily: keyof FontFamily;
+  fontSize: keyof FontSize;
+  fontWeight: keyof FontWeight;
+  lineHeight: keyof LineHeight;
+  letterSpacing?: keyof LetterSpacing;
+  textTransform?: 'uppercase' | 'lowercase' | 'capitalize' | 'none';
+  // Optional theme-responsive properties
+  color?: string;
+  darkColor?: string;
+}
+
+// Default typography implementation
+export const defaultFontFamily: FontFamily = {
+  sans: ['Inter', 'sans-serif'],
+  serif: ['Georgia', 'serif'],
+  mono: ['Menlo', 'monospace'],
+};
+
+export const defaultFontSize: FontSize = {
+  xs: '0.75rem', // 12px
+  sm: '0.875rem', // 14px
+  base: '1rem', // 16px
+  lg: '1.125rem', // 18px
+  xl: '1.25rem', // 20px
+  '2xl': '1.5rem', // 24px
+  '3xl': '1.875rem', // 30px
+  '4xl': '2.25rem', // 36px
+  '5xl': '3rem', // 48px
+  '6xl': '3.75rem', // 60px
+  '7xl': '4.5rem', // 72px
+  '8xl': '6rem', // 96px
+  '9xl': '8rem', // 128px
+};
+
+export const defaultFontWeight: FontWeight = {
+  thin: 100,
+  extralight: 200,
+  light: 300,
+  normal: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+  extrabold: 800,
+  black: 900,
+};
+
+export const defaultLineHeight: LineHeight = {
+  none: '1',
+  tight: '1.25',
+  snug: '1.375',
+  normal: '1.5',
+  relaxed: '1.625',
+  loose: '2',
+  '3': '.75rem',
+  '4': '1rem',
+  '5': '1.25rem',
+  '6': '1.5rem',
+  '7': '1.75rem',
+  '8': '2rem',
+  '9': '2.25rem',
+  '10': '2.5rem',
+};
+
+export const defaultLetterSpacing: LetterSpacing = {
+  tighter: '-0.05em',
+  tight: '-0.025em',
+  normal: '0',
+  wide: '0.025em',
+  wider: '0.05em',
+  widest: '0.1em',
+};
+
+export const defaultTextStyles: TextStyles = {
+  h1: {
+    fontFamily: 'sans',
+    fontSize: '4xl',
+    fontWeight: 'bold',
+    lineHeight: 'normal',
+  },
+  h2: {
+    fontFamily: 'sans',
+    fontSize: '3xl',
+    fontWeight: 'bold',
+    lineHeight: 'tight',
+  },
+  h3: {
+    fontFamily: 'sans',
+    fontSize: '2xl',
+    fontWeight: 'semibold',
+    lineHeight: 'tight',
+  },
+  h4: {
+    fontFamily: 'sans',
+    fontSize: 'xl',
+    fontWeight: 'semibold',
+    lineHeight: 'normal',
+  },
+  h5: {
+    fontFamily: 'sans',
+    fontSize: 'lg',
+    fontWeight: 'medium',
+    lineHeight: 'tight',
+  },
+  h6: {
+    fontFamily: 'sans',
+    fontSize: 'base',
+    fontWeight: 'medium',
+    lineHeight: 'tight',
+  },
+  subtitle1: {
+    fontFamily: 'sans',
+    fontSize: 'lg',
+    fontWeight: 'normal',
+    lineHeight: 'normal',
+  },
+  subtitle2: {
+    fontFamily: 'sans',
+    fontSize: 'base',
+    fontWeight: 'medium',
+    lineHeight: 'normal',
+  },
+  body1: {
+    fontFamily: 'sans',
+    fontSize: 'base',
+    fontWeight: 'normal',
+    lineHeight: 'normal',
+  },
+  body2: {
+    fontFamily: 'sans',
+    fontSize: 'sm',
+    fontWeight: 'normal',
+    lineHeight: 'normal',
+  },
+  button: {
+    fontFamily: 'sans',
+    fontSize: 'base',
+    fontWeight: 'medium',
+    lineHeight: 'tight',
+    textTransform: 'uppercase',
+  },
+  caption: {
+    fontFamily: 'sans',
+    fontSize: 'xs',
+    fontWeight: 'normal',
+    lineHeight: 'tight',
+  },
+  overline: {
+    fontFamily: 'sans',
+    fontSize: 'xs',
+    fontWeight: 'normal',
+    lineHeight: 'tight',
+    textTransform: 'uppercase',
+  },
+  code: {
+    fontFamily: 'mono',
+    fontSize: 'sm',
+    fontWeight: 'normal',
+    lineHeight: 'normal',
+  },
+};
+
+export const defaultTypography: Typography = {
+  fontFamily: defaultFontFamily,
+  fontSize: defaultFontSize,
+  fontWeight: defaultFontWeight,
+  lineHeight: defaultLineHeight,
+  letterSpacing: defaultLetterSpacing,
+};
+
+
+================================================================================
+
+# .\vite-env.d.ts
+
+/// <reference types="vite/client" />
+
+
+--------------------------------------------------------------------------------
+Total TypeScript files found: 17
