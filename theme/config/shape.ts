@@ -6,6 +6,9 @@ import {
   defaultShapeConfig,
   ShapeVariants,
   defaultShapeVariants,
+  BorderWidths,
+  BorderRadius,
+  Shadows,
 } from '../types/shape';
 import { Theme } from '../types/theme';
 

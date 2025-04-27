@@ -26,9 +26,18 @@ export const defaultLightStateSystemConfig: StateSystemConfig = {
     // Button-specific state overrides
     button: {
       interactive: {
+        default: {
+          backgroundColor: 'transparent',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease-in-out',
+        },
         hover: {
           backgroundColor: 'var(--color-primaryHover)',
           textColor: 'white',
+        },
+        focus: {
+          outline: '2px solid var(--color-borderFocus)',
+          outlineOffset: '2px',
         },
         active: {
           backgroundColor: 'var(--color-primaryActive)',
@@ -40,24 +49,70 @@ export const defaultLightStateSystemConfig: StateSystemConfig = {
           cursor: 'not-allowed',
           opacity: '0.65',
         },
+        hoverActive: {
+          backgroundColor: 'var(--color-primaryActive)',
+          transform: 'scale(0.98)',
+        },
+        focusVisible: {
+          outline: '2px solid var(--color-primary)',
+          outlineOffset: '2px',
+          boxShadow: '0 0 0 4px var(--color-primaryOutline)',
+        },
       },
     },
     // Input-specific state overrides
     input: {
       interactive: {
+        default: {
+          backgroundColor: 'var(--color-backgroundInput)',
+          borderColor: 'var(--color-border)',
+          transition: 'all 0.2s ease-in-out',
+        },
+        hover: {
+          borderColor: 'var(--color-borderHover)',
+        },
         focus: {
           borderColor: 'var(--color-primary)',
           boxShadow: '0 0 0 3px var(--color-primaryOutline)',
+        },
+        active: {
+          borderColor: 'var(--color-primary)',
         },
         disabled: {
           backgroundColor: 'var(--color-backgroundMuted)',
           opacity: '0.6',
         },
+        hoverActive: {
+          borderColor: 'var(--color-primary)',
+        },
+        focusVisible: {
+          borderColor: 'var(--color-primary)',
+          boxShadow: '0 0 0 3px var(--color-primaryOutline)',
+        },
       },
       feedback: {
+        idle: {
+          backgroundColor: 'var(--color-backgroundInput)',
+        },
+        loading: {
+          opacity: '0.8',
+          animation: 'pulse 1.5s ease-in-out infinite',
+        },
+        success: {
+          borderColor: 'var(--color-success)',
+          boxShadow: '0 0 0 3px var(--color-successSubtle)',
+        },
         error: {
           borderColor: 'var(--color-error)',
           boxShadow: '0 0 0 3px var(--color-errorSubtle)',
+        },
+        warning: {
+          borderColor: 'var(--color-warning)',
+          boxShadow: '0 0 0 3px var(--color-warningSubtle)',
+        },
+        info: {
+          borderColor: 'var(--color-info)',
+          boxShadow: '0 0 0 3px var(--color-infoSubtle)',
         },
       },
     },
@@ -66,14 +121,34 @@ export const defaultLightStateSystemConfig: StateSystemConfig = {
       interactive: {
         default: {
           textDecoration: 'none',
-          color: 'var(--color-primary)',
+          textColor: 'var(--color-primary)',
         },
         hover: {
           textDecoration: 'underline',
-          color: 'var(--color-primaryHover)',
+          textColor: 'var(--color-primaryHover)',
+        },
+        focus: {
+          outline: '2px solid var(--color-borderFocus)',
+          outlineOffset: '2px',
+        },
+        active: {
+          textColor: 'var(--color-primaryActive)',
+        },
+        disabled: {
+          textColor: 'var(--color-textMuted)',
+          opacity: '0.65',
+          cursor: 'not-allowed',
+        },
+        hoverActive: {
+          textDecoration: 'underline',
+          textColor: 'var(--color-primaryActive)',
+        },
+        focusVisible: {
+          outline: '2px solid var(--color-primary)',
+          outlineOffset: '2px',
         },
         visited: {
-          color: 'var(--color-secondary)',
+          textColor: 'var(--color-secondary)',
         },
       },
     },
@@ -87,9 +162,18 @@ export const defaultDarkStateSystemConfig: StateSystemConfig = {
     // Dark theme button-specific state overrides
     button: {
       interactive: {
+        default: {
+          backgroundColor: 'transparent',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease-in-out',
+        },
         hover: {
           backgroundColor: 'var(--color-primaryHover)',
           textColor: 'white',
+        },
+        focus: {
+          outline: '2px solid var(--color-borderFocus)',
+          outlineOffset: '2px',
         },
         active: {
           backgroundColor: 'var(--color-primaryActive)',
@@ -100,6 +184,15 @@ export const defaultDarkStateSystemConfig: StateSystemConfig = {
           textColor: 'var(--color-textMuted)',
           cursor: 'not-allowed',
           opacity: '0.65',
+        },
+        hoverActive: {
+          backgroundColor: 'var(--color-primaryActive)',
+          transform: 'scale(0.98)',
+        },
+        focusVisible: {
+          outline: '2px solid var(--color-primary)',
+          outlineOffset: '2px',
+          boxShadow: '0 0 0 4px var(--color-primaryOutline)',
         },
       },
     },
