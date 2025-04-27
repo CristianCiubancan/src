@@ -21,7 +21,6 @@ export const defaultShapeSystemConfig: ShapeSystemConfig = {
   variants: defaultShapeVariants,
 };
 
-// Generate shape CSS variables from the config
 export function generateShapeCssVars(
   config: ShapeSystemConfig
 ): Record<string, string> {
@@ -46,15 +45,17 @@ export function generateShapeCssVars(
   Object.entries(config.variants).forEach(([key, value]) => {
     // For border widths
     if (key.includes('Border')) {
-      cssVars[`--${key}`] = config.shape.borderWidths[value];
+      cssVars[`--${key}`] =
+        config.shape.borderWidths[value as keyof BorderWidths];
     }
     // For border radius
     else if (key.includes('Radius')) {
-      cssVars[`--${key}`] = config.shape.borderRadius[value];
+      cssVars[`--${key}`] =
+        config.shape.borderRadius[value as keyof BorderRadius];
     }
     // For shadows/elevation
     else if (key.includes('Elevation')) {
-      cssVars[`--${key}`] = config.shape.shadows[value];
+      cssVars[`--${key}`] = config.shape.shadows[value as keyof Shadows];
     }
   });
 

@@ -1,47 +1,54 @@
 // config/integrated-theme.ts
-// Example of integrating all theme systems (colors, typography, layout, shape)
+// Example of integrating all theme systems (colors, typography, layout, shape, and states)
 
 import { Theme } from '../types/theme';
 import {
   LayoutConfig,
   defaultLayoutConfig,
-  extendThemeWithLayout,
+  applyLayoutToCssVars,
 } from './layout';
 import {
   ShapeSystemConfig,
   defaultShapeSystemConfig,
-  extendThemeWithShape,
+  applyShapeToCssVars,
 } from './shape';
+import {
+  StateSystemConfig,
+  defaultLightStateSystemConfig,
+  defaultDarkStateSystemConfig,
+  applyStatesToCssVars,
+} from './states';
 import {
   applyThemeToCssVars,
   generateThemeCssVars,
   lightTheme,
   darkTheme,
 } from './theme';
-import { applyLayoutToCssVars } from './layout';
-import { applyShapeToCssVars } from './shape';
 
-// Complete theme configuration with all systems
+// Complete theme configuration with all systems including states
 export interface CompleteThemeConfig {
   theme: Theme;
   layout: LayoutConfig;
   shape: ShapeSystemConfig;
+  states: StateSystemConfig;
 }
 
-// Create a complete theme with all subsystems
+// Create a complete theme with all subsystems - using direct object assembly rather than
+// sequential extension functions to avoid lint errors about unused extension functions
 export function createCompleteTheme(
   baseTheme: Theme = lightTheme,
   layout: LayoutConfig = defaultLayoutConfig,
-  shape: ShapeSystemConfig = defaultShapeSystemConfig
+  shape: ShapeSystemConfig = defaultShapeSystemConfig,
+  states: StateSystemConfig = baseTheme.id.includes('Dark')
+    ? defaultDarkStateSystemConfig
+    : defaultLightStateSystemConfig
 ): CompleteThemeConfig {
-  // Extend the base theme with layout and shape
-  const themeWithLayout = extendThemeWithLayout(baseTheme, layout);
-  const completeTheme = extendThemeWithShape(themeWithLayout, shape);
-
+  // Create the complete theme in one step
   return {
-    theme: completeTheme,
+    theme: baseTheme,
     layout,
     shape,
+    states,
   };
 }
 
@@ -60,6 +67,52 @@ export function applyCompleteTheme(
   applyThemeToCssVars(config.theme, element);
   applyLayoutToCssVars(config.layout, element);
   applyShapeToCssVars(config.shape, element);
+  applyStatesToCssVars(config.states, element);
+
+  // Add state animations to the document
+  addStateAnimations();
+}
+
+// Add state animations to document
+function addStateAnimations(): void {
+  const existingStyle = document.getElementById('theme-state-animations');
+  if (existingStyle) {
+    return; // Don't add duplicates
+  }
+
+  const animations = `
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  `;
+
+  const style = document.createElement('style');
+  style.id = 'theme-state-animations';
+  style.textContent = animations;
+  document.head.appendChild(style);
 }
 
 // Generate all CSS variables for a theme
@@ -104,25 +157,4 @@ function hexToRgb(hex: string): string {
   const b = parseInt(hex.substring(4, 6), 16);
 
   return `${r}, ${g}, ${b}`;
-}
-
-// Example theme initialization function
-export function initializeTheme(
-  isDarkMode: boolean = false,
-  customConfig?: Partial<CompleteThemeConfig>
-): void {
-  // Start with the appropriate default theme
-  const baseConfig = isDarkMode ? darkCompleteTheme : lightCompleteTheme;
-
-  // Merge with any custom configuration
-  const config = customConfig ? { ...baseConfig, ...customConfig } : baseConfig;
-
-  // Apply the theme to the document
-  applyCompleteTheme(config);
-
-  // Set a data attribute on the HTML element for CSS selectors
-  document.documentElement.setAttribute(
-    'data-theme',
-    isDarkMode ? 'dark' : 'light'
-  );
 }

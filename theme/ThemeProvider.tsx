@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Theme } from './types/theme';
+import React, { useState, useEffect } from 'react';
 import { ThemeMode } from './types/theme';
 import { LayoutConfig } from './config/layout';
 import { ShapeSystemConfig } from './config/shape';
-import { lightTheme, darkTheme, themes, getThemeByMode } from './config/theme';
+import { StateSystemConfig } from './config/states';
+import { lightTheme, darkTheme, themes } from './config/theme';
 import {
   CompleteThemeConfig,
   createCompleteTheme,
@@ -11,27 +11,11 @@ import {
 } from './config/integrated-theme';
 import { defaultLayoutConfig } from './config/layout';
 import { defaultShapeSystemConfig } from './config/shape';
-
-// Theme context interface
-interface ThemeContextType {
-  currentTheme: CompleteThemeConfig;
-  themeMode: ThemeMode;
-  setThemeMode: (mode: ThemeMode) => void;
-  setThemeId: (id: string) => void;
-  availableThemes: Record<string, Theme>;
-}
-
-// Create the theme context with default values
-const ThemeContext = createContext<ThemeContextType>({
-  currentTheme: createCompleteTheme(lightTheme),
-  themeMode: 'light',
-  setThemeMode: () => {},
-  setThemeId: () => {},
-  availableThemes: themes,
-});
-
-// Hook to use the theme context
-export const useTheme = () => useContext(ThemeContext);
+import {
+  defaultLightStateSystemConfig,
+  defaultDarkStateSystemConfig,
+} from './config/states';
+import { ThemeContext } from './ThemeContext';
 
 // Theme provider props
 interface ThemeProviderProps {
@@ -40,15 +24,17 @@ interface ThemeProviderProps {
   initialThemeId?: string;
   customLayouts?: Record<string, LayoutConfig>;
   customShapes?: Record<string, ShapeSystemConfig>;
+  customStates?: Record<string, StateSystemConfig>;
 }
 
 // Theme provider component
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   initialMode = 'system',
   initialThemeId = 'light',
   customLayouts = {},
   customShapes = {},
+  customStates = {},
 }) => {
   // Check system preference
   const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(
@@ -64,7 +50,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     const baseTheme = themeId in themes ? themes[themeId] : lightTheme;
     const layout = customLayouts[themeId] || defaultLayoutConfig;
     const shape = customShapes[themeId] || defaultShapeSystemConfig;
-    return createCompleteTheme(baseTheme, layout, shape);
+    const states =
+      customStates[themeId] ||
+      (themeId.includes('Dark')
+        ? defaultDarkStateSystemConfig
+        : defaultLightStateSystemConfig);
+
+    return createCompleteTheme(baseTheme, layout, shape, states);
   });
 
   // Listen to system theme changes
@@ -107,12 +99,17 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         ? darkTheme
         : lightTheme;
 
-    // Get layout and shape configs
+    // Get layout, shape, and states configs
     const layout = customLayouts[effectiveThemeId] || defaultLayoutConfig;
     const shape = customShapes[effectiveThemeId] || defaultShapeSystemConfig;
+    const states =
+      customStates[effectiveThemeId] ||
+      (effectiveThemeId.includes('Dark')
+        ? defaultDarkStateSystemConfig
+        : defaultLightStateSystemConfig);
 
     // Create and set the complete theme
-    const newTheme = createCompleteTheme(baseTheme, layout, shape);
+    const newTheme = createCompleteTheme(baseTheme, layout, shape, states);
     setCurrentTheme(newTheme);
 
     // Apply theme to document
@@ -121,23 +118,28 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     // Update data attribute for CSS selectors
     document.documentElement.setAttribute('data-theme', baseTheme.id);
     document.documentElement.setAttribute('data-theme-mode', themeMode);
-  }, [themeMode, themeId, systemPrefersDark, customLayouts, customShapes]);
-
-  // Create context value
-  const contextValue: ThemeContextType = {
-    currentTheme,
+  }, [
     themeMode,
-    setThemeMode,
-    setThemeId,
-    availableThemes: themes,
-  };
+    themeId,
+    systemPrefersDark,
+    customLayouts,
+    customShapes,
+    customStates,
+  ]);
 
   return (
-    <ThemeContext.Provider value={contextValue}>
+    <ThemeContext.Provider
+      value={{
+        currentTheme,
+        themeMode,
+        setThemeMode,
+        setThemeId,
+        availableThemes: themes,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
 };
 
-// Export the Provider component as default
 export default ThemeProvider;

@@ -108,8 +108,8 @@ export function createCustomLayout(
 // Generate a responsive container class
 export function createResponsiveContainer(
   config: LayoutConfig = defaultLayoutConfig
-): Record<string, any> {
-  const containerStyles: Record<string, any> = {
+): Record<string, string | Record<string, string>> {
+  const containerStyles: Record<string, string | Record<string, string>> = {
     width: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
@@ -125,7 +125,7 @@ export function createResponsiveContainer(
   containerStyles.paddingRight = basePadding;
 
   // Add responsive max-widths and paddings
-  const mediaQueries: Record<string, any> = {};
+  const mediaQueries: Record<string, Record<string, string>> = {};
 
   Object.entries(config.breakpoints).forEach(([breakpoint, minWidth]) => {
     const bpKey = breakpoint as keyof Breakpoints;
@@ -145,7 +145,7 @@ export function createResponsiveContainer(
 // Helper for creating a grid row
 export function createGridRow(
   config: LayoutConfig = defaultLayoutConfig
-): Record<string, any> {
+): Record<string, string> {
   return {
     display: 'flex',
     flexWrap: 'wrap',
@@ -158,15 +158,15 @@ export function createGridRow(
 export function createGridColumn(
   spans: Record<keyof Breakpoints, number>,
   config: LayoutConfig = defaultLayoutConfig
-): Record<string, any> {
-  const columnStyles: Record<string, any> = {
+): Record<string, string | Record<string, string>> {
+  const columnStyles: Record<string, string | Record<string, string>> = {
     paddingLeft: config.spacing[config.grid.gutter],
     paddingRight: config.spacing[config.grid.gutter],
     width: '100%', // Default for smallest screens
   };
 
   // Add responsive column spans
-  const mediaQueries: Record<string, any> = {};
+  const mediaQueries: Record<string, Record<string, string>> = {};
 
   Object.entries(config.breakpoints).forEach(([breakpoint, minWidth]) => {
     const bpKey = breakpoint as keyof Breakpoints;
